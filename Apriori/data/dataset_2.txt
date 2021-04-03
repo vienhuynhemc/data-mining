@@ -1,0 +1,8 @@
+Tid	Content
+1	"Beef,Chicken,Milk"
+2	"Beef,Cheese"
+3	"Cheese,Boots"
+4	"Beef,Chicken,Cheese"
+5	"Beef,Chicken,Clothes,Cheese,Milk"
+6	"Chicken,Clothes,Milk"
+7	"Chicken,Milk,Clothes"

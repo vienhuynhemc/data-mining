@@ -1,0 +1,6 @@
+TID	items
+1	"banana,apple,mango"
+2	"bread,banana"
+3	"apple,milk,mango"
+4	"bread,banana,cheese"
+5	"milk,apple"

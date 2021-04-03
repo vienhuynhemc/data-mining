@@ -1,0 +1,11 @@
+TID	Items
+1	"a,b,d,e"
+2	"b,c,d"
+3	"a,b,d,e"
+4	"a,c,d,e"
+5	"b,c,d,e"
+6	"b,d,e"
+7	"c,d"
+8	"a,b,c"
+9	"a,d,e"
+10	"b,d,e"
