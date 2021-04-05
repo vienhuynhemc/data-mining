@@ -1,0 +1,15 @@
+@relation test
+@attribute 'Beef' {t}
+@attribute 'Chicken' {t}
+@attribute 'Milk' {t}
+@attribute 'Cheese' {t}
+@attribute 'Boots' {t}
+@attribute 'Clothes' {t}
+@data
+t,t,t,?,?,?
+t,?,?,t,?,?
+?,?,?,t,t,?
+t,t,?,t,?,?
+t,t,t,t,?,t
+?,t,t,?,?,t
+?,t,t,?,?,t
