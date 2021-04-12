@@ -5,22 +5,40 @@ import algothirm.Apriori;
 public class Main {
 
 	public static void main(String[] args) {
-		Apriori apriori1 = new Apriori("data/dataset_1.txt", 0.25, 0.5);
-		Apriori apriori2 = new Apriori("data/dataset_2.txt", 0.3, 0.5);
-		Apriori apriori3 = new Apriori("data/dataset_3.txt", (double) 2 / 9, 0.5);
-		Apriori apriori4 = new Apriori("data/dataset_4.txt", 0.3, 0.5);
-		Apriori apriori5 = new Apriori("data/dataset_5.txt", 0.4, 0.5);
-		Apriori apriori6 = new Apriori("data/dataset_6.txt", 0.6, 0.8);
-		Apriori apriori7 = new Apriori("data/dataset_7.txt", 0.7, 0.85);
-		Apriori apriori8 = new Apriori("data/dataset_8.txt", 0.5, 1);
-//		apriori1.run();
-		apriori2.run();
-//		apriori3.run();
-//		apriori4.run();
-//		apriori5.run();
-//		apriori6.run();
-//		apriori7.run();
-//		apriori8.run();
+		Apriori apriori = new Apriori();
+		/********** TEXT FILE **********/
+//		apriori.loadFileText("data/dataset_1.txt");
+//		apriori.setMinSupport(0.25);
+//		apriori.setMinConfidence(0.5);
+//		apriori.loadFileText("data/dataset_2.txt");
+//		apriori.setMinSupport(0.3);
+//		apriori.setMinConfidence(0.5);
+//		apriori.loadFileText("data/dataset_3.txt");
+//		apriori.setMinSupport((double) 2 / 9);
+//		apriori.setMinConfidence(0.5);
+//		apriori.loadFileText("data/dataset_4.txt");
+//		apriori.setMinSupport(0.3);
+//		apriori.setMinConfidence(0.5);
+//		apriori.loadFileText("data/dataset_5.txt");
+//		apriori.setMinSupport(0.4);
+//		apriori.setMinConfidence(0.5);
+//		apriori.loadFileText("data/dataset_6.txt");
+//		apriori.setMinSupport(0.6);
+//		apriori.setMinConfidence(0.8);
+//		apriori.loadFileText("data/dataset_7.txt");
+//		apriori.setMinSupport(0.7);
+//		apriori.setMinConfidence(0.85);
+//		apriori.loadFileText("data/dataset_8.txt");
+//		apriori.setMinSupport(0.5);
+//		apriori.setMinConfidence(1d);
+		/************** ARFF FILE ***********/
+//		apriori.loadFileArff("data/dataset_1.arff");
+//		apriori.setMinSupport(0.3);
+//		apriori.setMinConfidence(0.7);
+		apriori.loadFileArff("data/supermarket.arff");
+		apriori.setMinSupport(0.3);
+		apriori.setMinConfidence(0.7);
+		apriori.run();
 	}
 
 }

@@ -27,22 +27,24 @@ public class Apriori {
 	// 1. Link database
 	// 2. Minsupport (theo %)
 	// 3. Minconfidence (theo %)
-	public Apriori(String linkDatabase, double minSupport, double minConfidence) {
+	public Apriori() {
 		// Khởi tạo
-		init(linkDatabase, minSupport, minConfidence);
+		init();
 	}
 
-	private void init(String linkDatabase, double minSupport, double minConfidence) {
-		// dataset
-		this.dataset = new Dataset(linkDatabase);
-		// minSupport
-		this.minSupport = minSupport;
-		// minConfidence
-		this.minConfidence = minConfidence;
+	private void init() {
 		// Tập L
 		L = new ArrayList<>();
 		// Danh sách luật kết hợp
 		associationRules = new ArrayList<>();
+	}
+
+	public void loadFileText(String linkDatabase) {
+		this.dataset = new Dataset(linkDatabase, Dataset.FILE_TEXT);
+	}
+
+	public void loadFileArff(String linkDatabase) {
+		this.dataset = new Dataset(linkDatabase, Dataset.FILE_ARFF);
 	}
 
 	public void run() {
@@ -81,11 +83,11 @@ public class Apriori {
 								// Giải mã 2 itemset
 								// Lấy itemsetAfterDistinct = cách lấy itemsetAfter - itemsetBefore
 								Itemset itemsetAfterDistinct = subItemset(itemsetAfter, itemsetBefore);
+								itemsetAfterDistinct.setCount(countUnify);
 								List<String> itemsetBeforeAfterUnEnCode = unEncode(itemsetBefore);
 								List<String> itemsetAfterAfterUnEncode = unEncode(itemsetAfterDistinct);
 								associationRules.add(new AssociationRule(itemsetBefore, itemsetAfterDistinct,
-										itemsetBeforeAfterUnEnCode, itemsetAfterAfterUnEncode,
-										itemsetBefore.getSupport(), confidence));
+										itemsetBeforeAfterUnEnCode, itemsetAfterAfterUnEncode, confidence));
 								count++;
 							}
 						}
@@ -238,7 +240,12 @@ public class Apriori {
 		}
 		// Tính độ hỗ trợ
 		for (Itemset itemset : cn) {
-			itemset.setSupport((double) itemset.getCount() / dataset.getDataset().size());
+			// Làm tròn còn 1 chữ số thập phân
+			// Áp dụng cho dataset nhỏ
+//			double support = (double) Math.round(((double) itemset.getCount() / dataset.getDataset().size()) * 10) / 10;
+			// Không làm tròn áp dụng với mọi dataset
+			double support = (double) itemset.getCount() / dataset.getDataset().size();
+			itemset.setSupport(support);
 		}
 	}
 
@@ -315,7 +322,14 @@ public class Apriori {
 
 	private Itemset concatTwoItemsets(Itemset itemsetFirst, Itemset itemsetSecond) {
 		List<Integer> listItem = new ArrayList<>();
-		for (int i = 0; i < itemsetFirst.getListItem().size(); i++) {
+		int count = 0;
+		boolean isFirst = false;
+		int duyet1 = itemsetFirst.getListItem().size();
+		if (itemsetSecond.getListItem().size() < duyet1) {
+			duyet1 = itemsetSecond.getListItem().size();
+			isFirst = true;
+		}
+		for (int i = 0; i < duyet1; i++) {
 			// Mục đích ở đây là xem thử con nào nhỏ hơn add vô trước
 			// Cho mảng tạo theo thế tăng dần khỏi sắp xếp lại tốn time
 			int min;
@@ -332,6 +346,14 @@ public class Apriori {
 			}
 			if (!listItem.contains(max)) {
 				listItem.add(max);
+			}
+			count++;
+		}
+		for (int i = count; i < (isFirst ? itemsetFirst.getListItem().size()
+				: itemsetSecond.getListItem().size()); i++) {
+			int number = isFirst ? itemsetFirst.getListItem().get(i) : itemsetSecond.getListItem().get(i);
+			if (!listItem.contains(number)) {
+				listItem.add(number);
 			}
 		}
 		return new Itemset(listItem);
@@ -368,6 +390,10 @@ public class Apriori {
 		// 4. Tạo các 1-itemset và thêm vào C1
 		for (Map.Entry<Integer, Integer> entry : mapHelp.entrySet()) {
 			// support
+			// Làm tròn còn 1 chữ số thập phân
+			// Áp dụng cho dataset nhỏ
+//			double support = (double) Math.round((entry.getValue() / (double) dataset.getDataset().size()) * 10) / 10;
+			// Không làm tròn áp dụng với mọi dataset
 			double support = entry.getValue() / (double) dataset.getDataset().size();
 			// các biến của itemset
 			List<Integer> list = new ArrayList<>();
@@ -407,6 +433,31 @@ public class Apriori {
 			}
 		}
 		System.out.println("------------------------------------------------------");
+	}
+
+	// getter and setter
+	public Dataset getDataset() {
+		return dataset;
+	}
+
+	public void setDataset(Dataset dataset) {
+		this.dataset = dataset;
+	}
+
+	public Double getMinSupport() {
+		return minSupport;
+	}
+
+	public void setMinSupport(Double minSupport) {
+		this.minSupport = minSupport;
+	}
+
+	public Double getMinConfidence() {
+		return minConfidence;
+	}
+
+	public void setMinConfidence(Double minConfidence) {
+		this.minConfidence = minConfidence;
 	}
 
 }

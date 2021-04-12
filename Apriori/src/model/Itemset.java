@@ -39,7 +39,7 @@ public class Itemset {
 
 	// Tostring theo dạng itemset riêng biệt
 	public String toString() {
-		return "{ Data: " + listItem.toString() + ", Count: [" + count + "], Support: [" +  String.format("%,.2f", support) + "] }";
+		return "{ Data: " + listItem.toString() + ", Count: [" + count + "], Support: [" +  String.format("%,.5f", support) + "] }";
 	}
 
 	// Getter and setter

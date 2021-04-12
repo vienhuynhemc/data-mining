@@ -13,6 +13,9 @@ import model.Itemset;
 
 public class Dataset {
 
+	public static final int FILE_TEXT = 0;
+	public static final int FILE_ARFF = 1;
+
 	// Khai báo các thuộc tính
 	// Có một danh sách các cặp <Tên> - <List item>
 	private Map<String, Itemset> dataset;
@@ -24,11 +27,24 @@ public class Dataset {
 
 	// Constructor nhận vào link database
 	// Nạp các dữ liệu vào các biết
-	public Dataset(String linkDatabase) {
+	public Dataset(String linkDatabase, int type) {
 		// Khởi tạo
 		init();
 		// Nạp dữ liệu
-		loadData(linkDatabase);
+		switch (type) {
+		case FILE_TEXT:
+			loadDataTxt(linkDatabase);
+			break;
+		case FILE_ARFF:
+			loadArrFile(linkDatabase);
+			break;
+		}
+	}
+
+	private void loadNameArffFile(String readLine) {
+		String[] array = readLine.split(" ");
+		numericalOrder = "Tên quan hệ: ";
+		nameListItem = array[1];
 	}
 
 	// To String
@@ -44,7 +60,7 @@ public class Dataset {
 	public String toStringMapping() {
 		String s = "{\n";
 		for (Map.Entry<Integer, String> entry : nameMapping.entrySet()) {
-			s += entry.getValue()+" được gán tên là: "+entry.getKey()+ ",\n";
+			s += entry.getValue() + " được gán tên là: " + entry.getKey() + ",\n";
 		}
 		s = s.substring(0, s.length() - 2);
 		s += ".\n}\n";
@@ -56,7 +72,54 @@ public class Dataset {
 		nameMapping = new LinkedHashMap<>();
 	}
 
-	private void loadData(String linkDatabase) {
+	// load arff file
+	private void loadArrFile(String linkDatabase) {
+		try {
+			BufferedReader bufferedReader = new BufferedReader(new FileReader(new File(linkDatabase)));
+			loadNameArffFile(bufferedReader.readLine());
+			String line = null;
+			boolean nextIsData = false;
+			List<String> nameIndex = new ArrayList<>();
+			while (true) {
+				line = bufferedReader.readLine();
+				if (line == null) {
+					break;
+				}
+				// Nếu chưa tới đoạn lấy data thì lấy thuộc tính
+				if (!nextIsData) {
+					String[] array_1 = line.split(" ");
+					if (array_1[0].equals("@data")) {
+						nextIsData = true;
+						// sau khi lấy thuộc tính xong ta mapping vào nameMapping
+						mappingArff(nameIndex);
+					} else {
+						nameIndex.add(array_1[1].substring(1, array_1[1].length() - 1));
+					}
+				} else {
+					String[] array = line.split(",");
+					List<Integer> listNameMapping = new ArrayList<>();
+					for (int i = 0; i < array.length; i++) {
+						if (array[i].equals("t")) {
+							listNameMapping.add(i+1);
+						}
+					}
+					Itemset itemset = new Itemset(listNameMapping);
+					dataset.put(dataset.size() + 1 + "", itemset);
+				}
+			}
+		} catch (IOException e) {
+			System.out.println("Không tìm thấy dữ liệu");
+			e.printStackTrace();
+		}
+	}
+
+	public void mappingArff(List<String> nameIndex) {
+		for (String name : nameIndex) {
+			nameMapping.put(nameMapping.size() + 1, name);
+		}
+	}
+
+	private void loadDataTxt(String linkDatabase) {
 		try {
 			BufferedReader bufferedReader = new BufferedReader(new FileReader(new File(linkDatabase)));
 			// Nạp tên dataset

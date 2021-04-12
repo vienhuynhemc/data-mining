@@ -1,4 +1,4 @@
-@relation test
+@relation Ban_Hang
 @attribute 'Beef' {t}
 @attribute 'Chicken' {t}
 @attribute 'Milk' {t}
