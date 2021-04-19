@@ -6,186 +6,22 @@ import java.util.List;
 import java.util.Map;
 
 import data.Dataset;
-import model.AssociationRule;
 import model.Itemset;
 
-public class Apriori {
+public class Apriori implements InterfaceAlgorithm {
 
-	// Khai báo các thuộc tính
-	// Dataset
-	private Dataset dataset;
-	// Minsupport
-	private Double minSupport;
-	// Minconfidence
-	private Double minConfidence;
 	// Tập L gồm các itemset phổ biến
 	private List<List<Itemset>> L;
-	// Danh sách luật kết hợp
-	private List<AssociationRule> associationRules;
 
 	// Constructor nhận vào
 	// 1. Link database
 	// 2. Minsupport (theo %)
 	// 3. Minconfidence (theo %)
+
 	public Apriori() {
-		// Khởi tạo
-		init();
 	}
 
-	private void init() {
-		// Tập L
-		L = new ArrayList<>();
-		// Danh sách luật kết hợp
-		associationRules = new ArrayList<>();
-	}
-
-	public void loadFileText(String linkDatabase) {
-		this.dataset = new Dataset(linkDatabase, Dataset.FILE_TEXT);
-	}
-
-	public void loadFileArff(String linkDatabase) {
-		this.dataset = new Dataset(linkDatabase, Dataset.FILE_ARFF);
-	}
-
-	public void run() {
-		// In các thông indataset và duyệt lần đầu
-		// Vì lần đầu chưa cần áp dụng apriori
-		printRunInformation();
-		// Duyệt dataset tìm tất cả các itemset phổ biết còn lại
-		browseDataset();
-		System.out.println("\n=======");
-		System.out.println("Giai đoạn 2 - Phát sinh luật kết hợp");
-		System.out.println("=======");
-		// Ta sẽ phát sinh luật bằng cách cứ duyệt từ Ln -> Lmax-1 với n bắt dầu từ 1
-		// Vòng for 2 từ Ln+1 tới hết rồi phát sinh từng luật cụ thể
-		for (int i = 0; i < L.size() - 1; i++) {
-			List<Itemset> Ln = L.get(i);
-			int count = 0;
-			for (int j = i + 1; j < L.size(); j++) {
-				List<Itemset> LnPlus1 = L.get(j);
-				for (int k = 0; k < Ln.size(); k++) {
-					for (int l = 0; l < LnPlus1.size(); l++) {
-						Itemset itemsetBefore = Ln.get(k);
-						Itemset itemsetAfter = LnPlus1.get(l);
-						// Kiểm tra thử ông trc có phải là con của ông sau hay không
-						if (isSubItemset(itemsetBefore, itemsetAfter)) {
-							// ==> Có thể phát sinh luật từ cặp này
-							// Ghép chúng lại thành 1 itemset cho dễ đếm confidence
-							Itemset unify = concatTwoItemsets(itemsetBefore, itemsetAfter);
-							// Số lần xuất hiện của before
-							int countBefore = itemsetBefore.getCount();
-							// Số lần xuất hiện của unify
-							int countUnify = getCountOneItemset(unify);
-							// Tính độ tinh cậy
-							double confidence = (double) countUnify / countBefore;
-							// Kiểm tra và thêm vào danh sách luật
-							if (confidence >= minConfidence) {
-								// Giải mã 2 itemset
-								// Lấy itemsetAfterDistinct = cách lấy itemsetAfter - itemsetBefore
-								Itemset itemsetAfterDistinct = subItemset(itemsetAfter, itemsetBefore);
-								itemsetAfterDistinct.setCount(countUnify);
-								List<String> itemsetBeforeAfterUnEnCode = unEncode(itemsetBefore);
-								List<String> itemsetAfterAfterUnEncode = unEncode(itemsetAfterDistinct);
-								associationRules.add(new AssociationRule(itemsetBefore, itemsetAfterDistinct,
-										itemsetBeforeAfterUnEnCode, itemsetAfterAfterUnEncode, confidence));
-								count++;
-							}
-						}
-					}
-				}
-			}
-			System.out.println("Với " + (i + 1) + "-itemset phát sinh được " + count + " luật");
-		}
-		System.out.println("-----------------Kết thúc giao đoạn 2-----------------\n");
-		// Kết quả
-		System.out.println("=======");
-		System.out.println("Kết quả chưa được giải mã");
-		System.out.println("=======");
-		for (AssociationRule associationRule : associationRules) {
-			System.out.println(associationRule.toString());
-		}
-		System.out.println("\n=======");
-		System.out.println("Kết quả đã được giải mã");
-		System.out.println("=======");
-		for (AssociationRule associationRule : associationRules) {
-			System.out.println(associationRule.toStringUnEncode());
-		}
-		System.out.println("=======");
-		System.out.println("******************************************");
-		System.out.println("******************************************");
-		System.out.println("******************************************");
-	}
-
-	private Itemset subItemset(Itemset itemsetAfter, Itemset itemsetBefore) {
-		List<Integer> listNewItem = new ArrayList<>();
-		for (int i = 0; i < itemsetAfter.getListItem().size(); i++) {
-			boolean isHave = false;
-			for (int j = 0; j < itemsetBefore.getListItem().size(); j++) {
-				if (itemsetBefore.getListItem().get(j) == itemsetAfter.getListItem().get(i)) {
-					isHave = true;
-					break;
-				}
-			}
-			if (!isHave) {
-				listNewItem.add(itemsetAfter.getListItem().get(i));
-			}
-		}
-		return new Itemset(listNewItem);
-	}
-
-	private List<String> unEncode(Itemset itemset) {
-		List<String> result = new ArrayList<>();
-		for (Integer number : itemset.getListItem()) {
-			result.add(dataset.getNameMapping().get(number));
-		}
-		return result;
-	}
-
-	private int getCountOneItemset(Itemset unify) {
-		int count = 0;
-		for (Map.Entry<String, Itemset> entry : dataset.getDataset().entrySet()) {
-			// Dùng lại hàm isSubItem
-			if (isSubItemset(unify, entry.getValue())) {
-				count++;
-			}
-		}
-		return count;
-	}
-
-	private void printAttribute() {
-		System.out.println("\nAprior");
-		System.out.println("=======");
-		System.out.println("Độ hỗ trợ tối thiểu (min support): " + String.format("%,.2f", minSupport * 100) + "%");
-		System.out.println(
-				"Độ tin cậy tối thiểu (min confidence): " + String.format("%,.2f", minConfidence * 100) + "%\n");
-	}
-
-	private void printRunInformation() {
-		System.out.println("******************************************");
-		System.out.println("******************************************");
-		System.out.println("******************************************");
-		System.out.println("=== Chạy thông tin ===\n");
-		System.out.println("Dataset: \n" + dataset.toString());
-		System.out.println("Mapping: \n" + dataset.toStringMapping());
-		System.out.println("Số dòng dữ liệu: " + dataset.getDataset().size() + "\n");
-		// Lấy các thuộc tính riêng biệt từ dataset
-		List<Integer> distinctAttribute = dataset.getDistinctAttribute();
-		System.out.println("Số thuộc tính: " + distinctAttribute.size());
-		System.out.println(distinctAttribute.toString());
-		System.out.println("----------------------------------------");
-		// các tham số
-		printAttribute();
-		// Duyệt lần dầu
-		// Bởi vì lần đầu chỉ là 1-itemset
-		// nên chưa áp dụng apriori
-		// Ta đã lấy tập các attribute không trùng ở trên nên có thì sử dụng thôi
-		System.out.println("=======");
-		System.out.println("Giai đoạn 1 - Tìm tất cả các tập phổ biến");
-		System.out.println("=======");
-		browseDatasetFirst(distinctAttribute);
-	}
-
-	private void browseDataset() {
+	private void browseDataset(Dataset dataset, double minSupport) {
 		// Các thuộc tính cần thiết
 		// 1.Lần duyệt
 		// Ta bắt đầu từ 2
@@ -204,11 +40,11 @@ public class Apriori {
 			// -- Thõa 2 yêu cầu ở trên đã đề ra
 			List<Itemset> Cn = getCandidateStepK(listBefore, k - 2);
 			// Bước 2 : Có tập Cn rồi ta tính số lần xuất hiện và độ hỗ trợ
-			fillSupportAndCountForCn(Cn);
+			fillSupportAndCountForCn(Cn, dataset);
 			// -- In Cn ra
 			printListItemSet("C" + k, Cn);
 			// Bước 2 : Duyệt qua Cn loại các itemset không thõa minsupport tạo thành Ln
-			verifyMinSupport(Cn);
+			verifyMinSupport(Cn, minSupport);
 			// -- In Ln ra
 			printListItemSet("L" + k, Cn);
 			// Nếu Ln có size = 0 thì dừng thuật toán
@@ -227,7 +63,7 @@ public class Apriori {
 
 	}
 
-	private void fillSupportAndCountForCn(List<Itemset> cn) {
+	private void fillSupportAndCountForCn(List<Itemset> cn, Dataset dataset) {
 		// Duyệt qua dataset
 		for (Map.Entry<String, Itemset> entry : dataset.getDataset().entrySet()) {
 			// Duyệt qua mảng Cn , cứ nếu itemset nào là con của itemset của entry thì ++
@@ -372,7 +208,8 @@ public class Apriori {
 		return count == same;
 	}
 
-	private void browseDatasetFirst(List<Integer> distinceAtrribute) {
+	private void browseDatasetFirst(Dataset dataset, double minSupport) {
+		List<Integer> distinceAtrribute = dataset.getDistinctAttribute();
 		// Duyệt qua dataset tạo các 1-itemset
 		// 1. Tạo map hỗ trợ
 		Map<Integer, Integer> mapHelp = new LinkedHashMap<>();
@@ -405,14 +242,14 @@ public class Apriori {
 		// in C1 ra console
 		printListItemSet("C1", C1);
 		// Xóa những itemset không đủ độ hỗ trợ
-		verifyMinSupport(C1);
+		verifyMinSupport(C1, minSupport);
 		// in L1 ra console
 		printListItemSet("L1", C1);
 		// Thêm L1 vào L
 		L.add(C1);
 	}
 
-	private void verifyMinSupport(List<Itemset> itemsets) {
+	private void verifyMinSupport(List<Itemset> itemsets, double minSupport) {
 		int count = 0;
 		while (count < itemsets.size()) {
 			if (itemsets.get(count).getSupport() < minSupport) {
@@ -435,29 +272,20 @@ public class Apriori {
 		System.out.println("------------------------------------------------------");
 	}
 
-	// getter and setter
-	public Dataset getDataset() {
-		return dataset;
-	}
-
-	public void setDataset(Dataset dataset) {
-		this.dataset = dataset;
-	}
-
-	public Double getMinSupport() {
-		return minSupport;
-	}
-
-	public void setMinSupport(Double minSupport) {
-		this.minSupport = minSupport;
-	}
-
-	public Double getMinConfidence() {
-		return minConfidence;
-	}
-
-	public void setMinConfidence(Double minConfidence) {
-		this.minConfidence = minConfidence;
+	@Override
+	public List<List<Itemset>> execute(Dataset dataset, double minSupport) {
+		L = new ArrayList<>();
+		// Duyệt lần dầu
+		// Bởi vì lần đầu chỉ là 1-itemset
+		// nên chưa áp dụng apriori
+		// Ta đã lấy tập các attribute không trùng ở trên nên có thì sử dụng thôi
+		System.out.println("=======");
+		System.out.println("Giai đoạn 1 - Tìm tất cả các tập phổ biến");
+		System.out.println("=======");
+		browseDatasetFirst(dataset, minSupport);
+		// Duyệt dataset tìm tất cả các itemset phổ biết còn lại
+		browseDataset(dataset, minSupport);
+		return L;
 	}
 
 }
