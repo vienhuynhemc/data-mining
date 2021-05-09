@@ -8,7 +8,7 @@ public class AprioriUseAPIweka {
 
 	public static void main(String[] args) throws Exception {
 		// Load file arff
-		DataSource dataSource = new DataSource("data/dataset_ban_hang.arff");
+		DataSource dataSource = new DataSource("data/supermarket.arff");
 		// Lấy dataset từ dataSource
 		Instances datasets = dataSource.getDataSet();
 		// Tạo model Apriori
