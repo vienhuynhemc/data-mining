@@ -198,4 +198,30 @@ public class NaiveBayes {
 		return tittleInstancesClassIndex.getStringOfInt(numberSelect);
 	}
 
+	public void testClassifier(Instances instances) {
+		int count = 0;
+		int sum = 0;
+		for (Instance instance : instances.getInstances()) {
+			String string = "";
+			for (String s : instance.getDatas()) {
+				string += s + ",";
+			}
+			string = string.substring(0, string.length() - 1);
+			String result = testClassifier(string);
+			System.out.println(string + " ==> " + result);
+			sum++;
+			if (result.equals(instance.getDatas().get(instance.getDatas().size() - 1))) {
+				count++;
+			}
+		}
+		double correct = ((double) count) / sum * 100;
+		correct = (double) Math.round(correct * 10000) / 10000;
+		double ab = (double) Math.round((100 - correct) * 10000) / 10000;
+		System.out.println("\n===== Kết quả ======");
+		System.out.println("Tổng số dòng:\t\t\t" + sum);
+		System.out.println("Trường hợp ĐÚNG:\t\t" + count + "\t" + correct + "%");
+		System.out.println("Trường hợp SAI:\t\t\t" + (sum - count) + "\t" + ab + "%");
+
+	}
+
 }
