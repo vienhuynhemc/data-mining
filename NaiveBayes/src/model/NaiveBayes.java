@@ -6,13 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 public class NaiveBayes {
-	private Instances instances;
 	// Map lưu trữ số lần xuất hiện các lớp của thuộc tính được chọn
 	private Map<Integer, Integer> countMainAttributes;
 	// Danh sách lưu tất cả các object chứa các tham số của các thuộc tính còn lại
 	private List<ObjectNaiveBayes> objectNaiveBayes;
 	// Biến để xem thử có ông nào bằng 0 hay ko để cộng
 	private boolean isHaveZero;
+	// data Train
+	private Instances instances;
 
 	public NaiveBayes() {
 	}
@@ -65,6 +66,7 @@ public class NaiveBayes {
 		}
 		// in ra cho người dùng thấy
 		printableObjectNaiveBayes(instances);
+		this.instances = instances;
 	}
 
 	private void printableObjectNaiveBayes(Instances instances) {
@@ -139,7 +141,6 @@ public class NaiveBayes {
 		createAndCountMainAttribute(instances);
 		// Đếm số lần xuất hiện của các lớp của các thuộc tính còn lại
 		createObjectNaiveBayes(instances);
-		this.instances = instances;
 	}
 
 	private int countObject(int nameTittle, int number, int numberClassIndex, Instances instances) {
@@ -160,7 +161,7 @@ public class NaiveBayes {
 		return count;
 	}
 
-	public String testClassifier(String dataTest) {
+	public String testClassifier(String dataTest, Instances instances) {
 		String[] array = dataTest.split(",");
 		List<Integer> listTittle = new ArrayList<>();
 		List<Integer> maaping = new ArrayList<>();
@@ -199,29 +200,34 @@ public class NaiveBayes {
 	}
 
 	public void testClassifier(Instances instances) {
-		int count = 0;
-		int sum = 0;
-		for (Instance instance : instances.getInstances()) {
-			String string = "";
-			for (String s : instance.getDatas()) {
-				string += s + ",";
+		if (instances.getClassIndex() == this.instances.getClassIndex()) {
+			int count = 0;
+			int sum = 0;
+			for (Instance instance : instances.getInstances()) {
+				String string = "";
+				for (int i = 0; i < instance.getDatas().size(); i++) {
+					if (i != instances.getClassIndex()) {
+						string += instance.getDatas().get(i) + ",";
+					}
+				}
+				string = string.substring(0, string.length() - 1);
+				String result = testClassifier(string, instances);
+				System.out.println(string + " ==> " + result);
+				sum++;
+				if (result.equals(instance.getDatas().get(instances.getClassIndex()))) {
+					count++;
+				}
 			}
-			string = string.substring(0, string.length() - 1);
-			String result = testClassifier(string);
-			System.out.println(string + " ==> " + result);
-			sum++;
-			if (result.equals(instance.getDatas().get(instance.getDatas().size() - 1))) {
-				count++;
-			}
+			double correct = ((double) count) / sum * 100;
+			correct = (double) Math.round(correct * 10000) / 10000;
+			double ab = (double) Math.round((100 - correct) * 10000) / 10000;
+			System.out.println("\n===== Kết quả ======");
+			System.out.println("Tổng số dòng:\t\t\t" + sum);
+			System.out.println("Trường hợp ĐÚNG:\t\t" + count + "\t" + correct + "%");
+			System.out.println("Trường hợp SAI:\t\t\t" + (sum - count) + "\t" + ab + "%");
+		} else {
+			System.out.println("Lớp train và lớp test khác lớp chọn");
 		}
-		double correct = ((double) count) / sum * 100;
-		correct = (double) Math.round(correct * 10000) / 10000;
-		double ab = (double) Math.round((100 - correct) * 10000) / 10000;
-		System.out.println("\n===== Kết quả ======");
-		System.out.println("Tổng số dòng:\t\t\t" + sum);
-		System.out.println("Trường hợp ĐÚNG:\t\t" + count + "\t" + correct + "%");
-		System.out.println("Trường hợp SAI:\t\t\t" + (sum - count) + "\t" + ab + "%");
-
 	}
 
 }
