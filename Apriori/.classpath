@@ -6,7 +6,5 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="E:/mtj.jar"/>
-	<classpathentry kind="lib" path="E:/Weka-3-8-5/weka.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
